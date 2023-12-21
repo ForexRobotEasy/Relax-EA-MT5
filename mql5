@@ -1,0 +1,81 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                                      Relax EA MT5 |
+//|                                           https://forexroboteasy.com |
+//|                                           Developed by Forex Robot Easy Team |
+//+------------------------------------------------------------------+
+
+// Global variables
+double lotSize = 0.01; // Initial lot size
+int stopLoss = 50; // Stop loss in pips
+int takeProfit = 100; // Take profit in pips
+bool isFriday = false; // Flag to check if it's Friday
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Set trading session to close on Friday
+   TradeSessionSet('Friday', 0, 23, false);
+
+   return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+   // Reset trading session
+   TradeSessionSet('Friday', 0, 23, true);
+}
+
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+{
+   // Check if it's Friday
+   if (DayOfWeek() == FRIDAY)
+   {
+      isFriday = true;
+   }
+
+   // Check if it's the end of the trading session
+   if (TimeHour(TimeCurrent()) == 23 && TimeMinute(TimeCurrent()) == 59 && isFriday)
+   {
+      // Close all open trades
+      CloseAllTrades();
+   }
+
+   // Execute other trade functions based on specific patterns, volatility, and momentum
+   // ...
+
+   // Execute quick and predictable movements during periods of low volatility
+   // ...
+
+   // Close trades before the weekend market closure to avoid potential weekly gaps
+   // ...
+}
+
+//+------------------------------------------------------------------+
+//| Function to close all open trades                                 |
+//+------------------------------------------------------------------+
+void CloseAllTrades()
+{
+   int total = OrdersTotal();
+   for (int i = total - 1; i >= 0; i--)
+   {
+      if (OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
+      {
+         if (OrderSymbol() == Symbol() && OrderMagicNumber() == MagicNumber())
+         {
+            if (OrderType() == OP_BUY || OrderType() == OP_SELL)
+            {
+               OrderClose(OrderTicket(), OrderLots(), MarketInfo(OrderSymbol(), MODE_BID), Slippage, clrRed);
+            }
+         }
+      }
+   }
+}
